@@ -1,0 +1,47 @@
+- name: Remove old cluster
+  shell:
+    kubeadm reset --force
+  register: kubeadm_reset
+
+- name: Initialising k8s cluster
+  shell:
+    kubeadm init
+  register: kubeadm_init
+
+- name: Creating .kube dir
+  file:
+    path: ~/.kube
+    state: directory
+
+- name: Linking admin.conf file with ~/.kube/config
+  file:
+    src: /etc/kubernetes/admin.conf
+    dest: ~/.kube/config
+    state: link
+
+- name: Configuring Weavenet pod network
+  shell: kubectl apply -f "{{ weavenet_url }}"
+  register: weavenet_result
+
+- name: Getting token for new nodes join
+  shell: kubeadm token list | cut -d ' ' -f1 | sed -n '2p'
+  register: token_k8s
+
+- name: CA hash creation
+  shell: openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
+  register: ca_hash_master_k8s
+
+- name: Adding token and hash to a dummy host
+  add_host:
+    name: "K8S_TOKEN_HOLDER"
+    token: "{{ token_k8s.stdout  }}"
+    hash: "{{ ca_hash_master_k8s.stdout }}"
+
+- name:
+  debug:
+    msg: "[MASTER] K8S_TOKEN_HOLDER: token - {{ hostvars['K8S_TOKEN_HOLDER']['token'] }}"
+
+- name:
+  debug:
+    msg: "[MASTER] K8S_TOKEN_HOLDER: hash - {{ hostvars['K8S_TOKEN_HOLDER']['hash'] }}"
+

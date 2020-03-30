@@ -1,0 +1,9 @@
+---
+# vars file for roles/criando-instancias
+region: ams3
+image: ubuntu-18-04-x64
+droplet_size: s-2vcpu-2gb
+count: 3
+temp_group_name: temporary_inventory_group
+droplet_names: 
+  - ansible-1

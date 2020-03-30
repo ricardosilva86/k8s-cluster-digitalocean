@@ -1,0 +1,49 @@
+- name: Creating the Droplets
+  digital_ocean_droplet:
+    state: present
+    unique_name: yes
+    region: "{{ region }}"
+    image: "{{ image }}"
+    wait_timeout: 100
+    private_networking: yes
+    name: "{{ item }}"
+    size_id: "{{ droplet_size }}"
+    ssh_keys: ['e6:26:f1:02:9c:24:22:9c:fc:83:1b:24:77:b1:d5:d6']
+  register: created_droplet
+  with_items: 
+    - "{{ droplet_names }}"
+
+- name: Print droplet facts
+  debug:
+    msg: "{{ created_droplet.results }}"
+
+- name: Add instance to the inventory
+  add_host: 
+    name: "{{ item.data.ip_address }}" 
+    groups: "{{ temp_group_name }}"
+  with_items: "{{ created_droplet.results }}"
+
+- name: Adding public IP of created intance to the hosts inventory file
+  local_action: lineinfile
+    dest="./hosts"
+    regexp={{ item.data.ip_address }}
+    insertafter="[kubernetes]"
+    line={{ item.data.ip_address }}
+  with_items: "{{ created_droplet.results }}"
+
+
+- name: Adding private IP of created intance to the hosts inventory file
+  local_action: lineinfile
+    dest="./hosts"
+    regexp={{ item.data.private_ipv4_address }}
+    insertafter="[kubernetes]"
+    line={{ item.data.private_ipv4_address }}
+  with_items: "{{ created_droplet.results }}"
+
+- name: Waiting for SSH to be ready
+  local_action:
+    module: wait_for
+    host: "{{ item.data.ip_address }}"
+    port: 22
+    state: started
+  with_items: "{{ created_droplet.results }}"

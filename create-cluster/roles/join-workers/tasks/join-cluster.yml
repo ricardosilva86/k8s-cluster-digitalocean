@@ -1,0 +1,16 @@
+- name:
+  debug:
+    msg: "[WORKER] K8S_TOKEN_HOLDER - token {{ hostvars['K8S_TOKEN_HOLDER']['token'] }}"
+
+- name:
+  debug:
+    msg: "[WORKER] K8S_TOKEN_HOLDER - hash {{ hostvars['K8S_TOKEN_HOLDER']['hash'] }}"
+
+- name: Removing cluster
+  command:
+    kubeadm reset --force
+  register: kubeadm_reset
+
+- name: Adding worker to the k8s cluster
+  shell:
+    kubeadm join --token={{hostvars['K8S_TOKEN_HOLDER']['token']}} --discovery-token-ca-cert-hash sha256:{{hostvars['K8S_TOKEN_HOLDER']['hash']}} {{K8S_MASTER_NODE_IP}}:{{K8S_API_SECURE_PORT}}
