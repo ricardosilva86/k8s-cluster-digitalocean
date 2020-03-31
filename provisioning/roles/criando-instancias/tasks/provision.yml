@@ -43,4 +43,5 @@
     host: "{{ item.data.ip_address }}"
     port: 22
     state: started
+    timeout: 60
   with_items: "{{ created_droplet.results }}"

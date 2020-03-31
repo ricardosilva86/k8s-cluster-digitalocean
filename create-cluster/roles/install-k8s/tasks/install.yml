@@ -19,3 +19,16 @@
     - kubelet
     - kubeadm
     - kubectl
+
+- name: Setup Docker daemon
+  copy:
+    src: files/daemon.json
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+  notify: Restart Docker
+
+- name: Create Docker daemon service directory
+  file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
