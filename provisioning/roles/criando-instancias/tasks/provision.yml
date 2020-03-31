@@ -9,6 +9,7 @@
     name: "{{ item }}"
     size_id: "{{ droplet_size }}"
     ssh_keys: ['e6:26:f1:02:9c:24:22:9c:fc:83:1b:24:77:b1:d5:d6']
+    oauth_token: "{{ digitalocean_token }}"
   register: created_droplet
   with_items: 
     - "{{ droplet_names }}"
