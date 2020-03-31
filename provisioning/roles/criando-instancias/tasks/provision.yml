@@ -13,10 +13,6 @@
   with_items: 
     - "{{ droplet_names }}"
 
-- name: Print droplet facts
-  debug:
-    msg: "{{ created_droplet.results }}"
-
 - name: Add instance to the inventory
   add_host: 
     name: "{{ item.data.ip_address }}" 
