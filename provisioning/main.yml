@@ -1,3 +1,8 @@
 - hosts: local
   roles:
   - criando-instancias
+
+- hosts: kubernetes
+  user: root
+  roles:
+  - { role: create-ubuntu-user, tags: ["create_user_role"] }

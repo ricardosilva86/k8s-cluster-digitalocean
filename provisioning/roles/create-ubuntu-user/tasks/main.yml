@@ -1,0 +1,26 @@
+---
+# tasks file for roles/create-ubuntu-user
+- name: Create ubuntu user
+  user:
+    name: ubuntu
+    uid: 1000
+    state: present
+
+- name: Add authorized keys to ubuntu user
+  authorized_key:
+    user: ubuntu
+    state: present
+    key: "{{ auth_ssh_key }}"
+
+- name: Creating sudoers file
+  file:
+    path: /etc/sudoers.d/ubuntu
+    state: touch
+
+- name: Giving sudo whithout password to ubuntu user
+  lineinfile:
+    path: /etc/sudoers.d/ubuntu
+    state: present
+    line: 'ubuntu ALL=(ALL) NOPASSWD: ALL'
+
+    
